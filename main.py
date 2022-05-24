@@ -8,9 +8,20 @@ from mangum import Mangum
 stage = os.environ.get('STAGE', None)
 openapi_prefix = f"/{stage}" if stage else "/"
 
-app = FastAPI(title="MyAwesomeApp", openapi_prefix=openapi_prefix) # Here is the magic​
+app = FastAPI(title="Rae-api-v2", openapi_prefix=openapi_prefix) # Here is the magic​
 
 
+@app.get("/users/list", tags=["users"])
+def get_users():
+    users = UserModel.scan()
+    return users.attribute_values
+
+@app.get("/users/{id}", tags=["users"])
+def get_user(id: str):
+    user = UserModel.get(id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 @app.post("/create-user/{id}")
 def create_user(id: str, user: UserBaseModel):
