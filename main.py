@@ -1,20 +1,18 @@
 import os
 from models.users import UserModel
 from models.users import UserBaseModel
+from models.events import EventModel
+from models.events import EventBaseModel
 
 
 from fastapi import FastAPI, Path, Query, Body, Header, HTTPException, status
 from mangum import Mangum
+
 stage = os.environ.get('STAGE', None)
-openapi_prefix = f"/{stage}" if stage else "/"
+root_path = f"/{stage}" if stage else "/"
 
-app = FastAPI(title="Rae-api-v2", openapi_prefix=openapi_prefix) # Here is the magic​
+app = FastAPI(title="Rae-api-v2", root_path=root_path) # Here is the magic​
 
-
-@app.get("/users/list", tags=["users"])
-def get_users():
-    users = UserModel.scan()
-    return users
 
 @app.get("/users/{id}", tags=["users"])
 def get_user(id: str):
@@ -26,14 +24,15 @@ def get_user(id: str):
 @app.post("/create-user/{id}")
 def create_user(id: str, user: UserBaseModel):
     # Is this a new user? If so, create a new user.
-    users = UserModel.scan()
-    for user in users:
-        if user.id == id:
+    try:
+        user_id = UserModel.get(id)
+        if user_id:
             raise HTTPException(status_code=400, detail="User already exists")
-    #Create user to a dynamodb table
-    user = UserModel(id, username=user.username, photo=user.photo, email=user.email, friends=[])
-    user.save()
-    return {"message": "User with id ${id} created"}
+    except:
+        #Create user to a dynamodb table
+        user = UserModel(id, username=user.username, photo=user.photo, email=user.email, friends=[])
+        user.save()
+        return {"message": "User with id ${id} created"}
 
 @app.put("/update-user/{id}")
 def update_user(id: str, userModified: UserBaseModel):
@@ -65,5 +64,37 @@ def add_friend(id: str, friendId: str):
     friend.friends.append(id)
     friend.save()
     return {"message": "Friend added"}
+
+@app.post("/add-event-attendee/{userId}/{eventId}")
+def add_event_attendee(userId: str, eventId: str, event: EventBaseModel):
+    try:
+        event = EventModel.get(eventId)
+        event.attendees.append(userId)
+        event.save()
+    except:
+        #Create user to a dynamodb table
+        event = EventModel(eventId, attendees=[userId])
+        event.save()
+
+@app.get("/event-attendees/{eventId}")
+def get_event_attendees(eventId: str):
+    try:
+        event = EventModel.get(eventId)
+        return event.attendees
+    except:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")  
+
+@app.post("add-post/{userId}/{eventId}")
+def add_post(userId: str, eventId: str):
+    try:
+        user = UserModel.get(userId)
+        user.posts.append(eventId)
+        user.save()
+    except:
+        #Create user to a dynamodb table
+        user = UserModel(userId, posts=[eventId])
+        user.save()
+                 
+
 
 handler = Mangum(app)

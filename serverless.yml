@@ -11,6 +11,7 @@ provider:
 
 plugins:
   - serverless-python-requirements
+  - serverless-offline
 
 custom:
   pythonRequirements:
@@ -43,3 +44,4 @@ functions:
       - http:
           method: any
           path: /{proxy+}
+          cors: true

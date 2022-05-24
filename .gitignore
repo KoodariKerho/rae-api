@@ -15,6 +15,13 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+node_modules/
+.venv/
+.tox/
+.pytest_cache/
+.coverage
+.cache
+
 
 # Serverless directories
 .serverless
