@@ -1,5 +1,5 @@
 from pynamodb.models import Model
-from pynamodb.attributes import UnicodeAttribute
+from pynamodb.attributes import UnicodeAttribute, ListAttribute
 from pydantic import BaseModel
 from typing import Optional
 
@@ -14,6 +14,7 @@ class UserModel(Model):
     email = UnicodeAttribute()
     username = UnicodeAttribute()
     photo = UnicodeAttribute()
+    friends = ListAttribute()
 
 class UserBaseModel(BaseModel):
     """
@@ -23,3 +24,4 @@ class UserBaseModel(BaseModel):
     email: str
     username: Optional[str] = None
     photo: Optional[str] = None
+    friends: Optional[list] = None

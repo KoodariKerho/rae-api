@@ -31,7 +31,7 @@ def create_user(id: str, user: UserBaseModel):
         if user.id == id:
             raise HTTPException(status_code=400, detail="User already exists")
     #Create user to a dynamodb table
-    user = UserModel(id, username=user.username, photo=user.photo, email=user.email)
+    user = UserModel(id, username=user.username, photo=user.photo, email=user.email, friends=[])
     user.save()
     return {"message": "User with id ${id} created"}
 
@@ -46,7 +46,24 @@ def update_user(id: str, userModified: UserBaseModel):
     user.username = userModified.username
     user.photo = userModified.photo
     user.email = userModified.email
+    user.friends = userModified.friends
     user.save()
     return {"message": "User with id ${id} updated"}
+
+@app.put("/add-friend/{id}/{friendId}")
+def add_friend(id: str, friendId: str):
+    
+    user = UserModel.get(id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    user.friends.append(friendId)
+    user.save()
+
+    friend = UserModel.get(friendId)
+    if not friend:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    friend.friends.append(id)
+    friend.save()
+    return {"message": "Friend added"}
 
 handler = Mangum(app)
