@@ -14,7 +14,7 @@ app = FastAPI(title="Rae-api-v2", openapi_prefix=openapi_prefix) # Here is the m
 @app.get("/users/list", tags=["users"])
 def get_users():
     users = UserModel.scan()
-    return users.attribute_values
+    return users
 
 @app.get("/users/{id}", tags=["users"])
 def get_user(id: str):
