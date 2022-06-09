@@ -142,7 +142,8 @@ def get_friends_events(userId: str):
         for event in all_events:
             for post in posts:
                 if event["id"] in post["eventId"]:
-                    events.append({"event": event, "userId": post["userId"]})
+                    friend = UserModel.get(post["userId"])
+                    events.append({"event": event, "user": friend})
         return events
     except:
         return []
