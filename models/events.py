@@ -73,3 +73,6 @@ class EventBaseModel(BaseModel):
     timeUntilActual: Optional[int] = None
     timeUntilSalesStart: Optional[int] = None
     photoUrl: Optional[str] = None
+
+class EventListModel(BaseModel):
+    model: list

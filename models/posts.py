@@ -21,6 +21,7 @@ class PostModel(Model):
     salesOngoing: BooleanAttribute()
     timeUntilSalesStart: NumberAttribute()
     timeUntilActual: NumberAttribute()
+    eventId: UnicodeAttribute()
 
 class PostBaseModel(BaseModel):
     """
@@ -37,3 +38,5 @@ class PostBaseModel(BaseModel):
     salesOngoing: Optional[bool] = None
     timeUntilSalesStart: Optional[int] = None
     timeUntilActual: Optional[int] = None
+    eventId: Optional[str] = None
+    

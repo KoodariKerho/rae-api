@@ -1,7 +1,7 @@
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, ListAttribute
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 
 class UserModel(Model):
     """
@@ -15,6 +15,7 @@ class UserModel(Model):
     username = UnicodeAttribute()
     photo = UnicodeAttribute()
     friends = ListAttribute()
+    posts = ListAttribute()
 
 class UserBaseModel(BaseModel):
     """
@@ -25,3 +26,6 @@ class UserBaseModel(BaseModel):
     username: Optional[str] = None
     photo: Optional[str] = None
     friends: Optional[list] = None
+    posts: Optional[list] = None
+class EventModel(BaseModel):
+    model: List
