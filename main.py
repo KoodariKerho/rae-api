@@ -1,9 +1,6 @@
 import os
 from models.users import UserModel
 from models.users import UserBaseModel
-from models.events import EventModel
-from models.events import EventBaseModel
-from models.events import EventListModel
 import logging
 from urllib.request import urlopen
 import json
@@ -26,14 +23,16 @@ def get_user(id: str):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@app.post("/create-user/{id}")
+@app.post("/create-user/{id}", tags=["users"])
 def create_user(id: str, user: UserBaseModel):
 
     # Is this a new user? If so, create a new user.
     try:
         user_id = UserModel.get(id)
+        print(user_id)
+        print(id)
         if user_id.id == id:
-            raise HTTPException(status_code=409, detail="User already exists")
+            return "User already exists"
     except:
         #Create user to a dynamodb table
         logging.info(f"Creating user {id}")
@@ -47,7 +46,7 @@ def create_user(id: str, user: UserBaseModel):
             raise HTTPException(status_code=500, detail="Error creating user")
         
 
-@app.put("/update-user/{id}")
+@app.put("/update-user/{id}", tags=["users"])
 def update_user(id: str, userModified: UserBaseModel):
     users = UserModel.scan()
     for user in users:
@@ -63,54 +62,38 @@ def update_user(id: str, userModified: UserBaseModel):
     user.save()
     return {"message": "User with id ${id} updated"}
 
-@app.put("/add-friend/{id}/{friendId}")
+@app.put("/add-friend/{id}/{friendId}", tags=["friends"])
 def add_friend(id: str, friendId: str):
     
     user = UserModel.get(id)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if(friendId in user.friends):
+        return HTTPException(status_code=418, detail="Friend already added")
     user.friends.append(friendId)
     user.save()
 
     friend = UserModel.get(friendId)
     if not friend:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     friend.friends.append(id)
     friend.save()
     return {"message": "Friend added"}
 
-@app.post("/add-event-attendee-and-post-to-user/{userId}/{eventId}")
-def add_event_attendee(userId: str, eventId: str, event: EventBaseModel):
+@app.post("/add-post-to-user/{userId}/{eventId}", tags=["events"])
+def add_event_attendee(userId: str, eventId: str):
     try:
-        event = EventModel.get(eventId)
-        event.attendees.append(userId)
-        event.save()
-    except:
-        #Create user to a dynamodb table
-        event = EventModel(eventId, attendees=[userId])
-        event.save()
-        #TODO: Add post to user, make it work
-    try:
-        print("Adding post to user")
-        try:
-            user = UserModel.get(userId)
+        user = UserModel.get(userId)
+        if eventId not in user.posts:
             user.posts.append(eventId)
-        except Exception as e:
-            print(e)
-            logging.error(e)
-            user.posts = [eventId]
             user.save()
+        else:
+            return "Event already added"
     except:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"message": "Post added to user"}
 
-@app.get("/event-attendees/{eventId}")
-def get_event_attendees(eventId: str):
-    try:
-        event = EventModel.get(eventId)
-        return event.attendees
-    except:
-        return [] 
-@app.get("/friends/{userId}")
+@app.get("/friends/{userId}", tags=["friends"])
 def get_friends(userId: str):
     try:
         user = UserModel.get(userId)
@@ -130,7 +113,7 @@ def get_friends_posts(user):
             return "no posts"
     return event_ids
 
-@app.get("/friends-events/{userId}")
+@app.get("/friends-events/{userId}", tags=["events"])
 def get_friends_events(userId: str):
     user = UserModel.get(userId)
     posts = get_friends_posts(user)
@@ -148,11 +131,7 @@ def get_friends_events(userId: str):
     except:
         return []
 
-
-
-
-
-@app.get("/events")
+@app.get("/events", tags=["events"])
 def get_all_events():
     url = 'https://api.kide.app/api/products?city=Helsinki'
     response = urlopen(url)
@@ -160,8 +139,5 @@ def get_all_events():
     items = (data_json)
     return items.get('model')
 
-
-    
-    
 
 handler = Mangum(app)

@@ -27,5 +27,3 @@ class UserBaseModel(BaseModel):
     photo: Optional[str] = None
     friends: Optional[list] = None
     posts: Optional[list] = None
-class EventModel(BaseModel):
-    model: List
