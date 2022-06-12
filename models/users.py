@@ -27,3 +27,12 @@ class UserBaseModel(BaseModel):
     photo: Optional[str] = None
     friends: Optional[list] = None
     posts: Optional[list] = None
+
+class EventUserBaseModel(BaseModel):
+    """
+    A BaseModel for EventUser
+    """
+    userId: str
+    photo: str
+    username: Optional[str] = None
+    

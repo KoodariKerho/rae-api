@@ -1,6 +1,9 @@
 import os
 from models.users import UserModel
 from models.users import UserBaseModel
+from models.events import EventModel
+from models.events import EventBaseModel
+from models.users import EventUserBaseModel
 import logging
 from urllib.request import urlopen
 import json
@@ -80,18 +83,30 @@ def add_friend(id: str, friendId: str):
     friend.save()
     return {"message": "Friend added"}
 
-@app.post("/add-post-to-user/{userId}/{eventId}", tags=["events"])
-def add_event_attendee(userId: str, eventId: str):
+def add_to_user_posts(userId, eventId):
+    user = UserModel.get(userId)
+    if eventId not in user.posts:
+        user.posts.append(eventId)
+        user.save()
+    else:
+        return "Event already added"
+
+
+def add_user_to_event(eventId, user: EventUserBaseModel):
     try:
-        user = UserModel.get(userId)
-        if eventId not in user.posts:
-            user.posts.append(eventId)
-            user.save()
-        else:
-            return "Event already added"
+        event = EventModel.get(eventId)
     except:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return {"message": "Post added to user"}
+        event = EventModel(eventId, attendees = [])
+        event.save()
+    if user.userId not in event.attendees:
+        event.attendees.append({"userId": user.userId, "photo": user.photo, "username": user.username})
+        event.save()
+
+@app.post("/add-post-to-user/{userId}/{eventId}", tags=["events"])
+def add_event_attendee(userId: str, user: EventUserBaseModel, eventId: str):
+    add_to_user_posts(userId, eventId)
+    add_user_to_event(eventId, user)
+    return "aseiouhsefouh"
 
 @app.get("/friends/{userId}", tags=["friends"])
 def get_friends(userId: str):
