@@ -97,7 +97,12 @@ def add_event_attendee(userId: str, eventId: str):
 def get_friends(userId: str):
     try:
         user = UserModel.get(userId)
-        return user.friends
+        # Get all friend objects
+        friends = []
+        for friend in user.friends:
+            friend = UserModel.get(friend)
+            friends.append(friend)
+        return friends
     except:
         return []
 
