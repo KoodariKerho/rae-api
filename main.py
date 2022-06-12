@@ -98,15 +98,20 @@ def add_user_to_event(eventId, user: EventUserBaseModel):
     except:
         event = EventModel(eventId, attendees = [])
         event.save()
-    if user.userId not in event.attendees:
-        event.attendees.append({"userId": user.userId, "photo": user.photo, "username": user.username})
-        event.save()
+    for attendee in event.attendees:
+        if attendee['userId'] == user.userId:
+            return True
+    event.attendees.append({"userId": user.userId, "photo": user.photo, "username": user.username})
+    event.save()
 
 @app.post("/add-post-to-user/{userId}/{eventId}", tags=["events"])
 def add_event_attendee(userId: str, user: EventUserBaseModel, eventId: str):
     add_to_user_posts(userId, eventId)
-    add_user_to_event(eventId, user)
-    return "aseiouhsefouh"
+    isAlready = add_user_to_event(eventId, user)
+    if isAlready:
+        return HTTPException(status_code=400, detail="User already added to event")
+    else:
+        return HTTPException(status_code=200, detail="User added to event") 
 
 @app.get("/friends/{userId}", tags=["friends"])
 def get_friends(userId: str):
