@@ -35,4 +35,5 @@ class EventUserBaseModel(BaseModel):
     userId: str
     photo: str
     username: Optional[str] = None
-    
+
+

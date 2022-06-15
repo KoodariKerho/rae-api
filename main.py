@@ -7,10 +7,11 @@ from models.users import EventUserBaseModel
 import logging
 from urllib.request import urlopen
 import json
+import boto3
 
 
 
-from fastapi import FastAPI, Path, Query, Body, Header, HTTPException, status
+from fastapi import FastAPI, File, UploadFile, Path, Query, Body, Header, HTTPException, status
 from mangum import Mangum
 
 stage = os.environ.get('STAGE', None)
@@ -96,7 +97,7 @@ def add_user_to_event(eventId, user: EventUserBaseModel):
     try:
         event = EventModel.get(eventId)
     except:
-        event = EventModel(eventId, attendees = [])
+        event = EventModel(eventId, attendees = [], interested = [])
         event.save()
     for attendee in event.attendees:
         if attendee['userId'] == user.userId:
@@ -163,6 +164,27 @@ def get_all_events():
     data_json = json.loads(response.read())
     items = (data_json)
     return items.get('model')
+
+@app.get("/event_attendees_and_interested/{eventId}", tags=["events"])
+def get_event_attendees(eventId: str):
+    event = EventModel.get(eventId)
+    total_attendees =  len(event.attendees)
+    total_intrested = len(event.interested)
+    return {"total_attendees": total_attendees, "total_intrested": total_intrested}
+
+@app.post("/event_interested/{eventId}", tags=["events"])
+def get_interested(eventId: str, user: EventUserBaseModel):
+    try:
+        event = EventModel.get(eventId)
+    except:
+        event = EventModel(eventId, attendees = [], interested = [])
+    for interested in event.interested:
+        if interested['userId'] == user.userId:
+            return HTTPException(status_code=400, detail="User already added")
+    event.interested.append({"userId": user.userId, "photo": user.photo, "username": user.username})
+    event.save()
+    return HTTPException(status_code=200, detail="User added")
+    
 
 
 handler = Mangum(app)

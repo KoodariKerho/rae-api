@@ -12,6 +12,7 @@ class EventModel(Model):
         region = 'eu-north-1'
     event_id = UnicodeAttribute(hash_key=True)
     attendees = ListAttribute()
+    interested = ListAttribute()
 
 class EventBaseModel(BaseModel):
     """
@@ -19,6 +20,7 @@ class EventBaseModel(BaseModel):
     """
     event_id: str
     attendees: Optional[list] = None
+    interested: Optional[list] = None
 
 class EventListModel(BaseModel):
     model: list
