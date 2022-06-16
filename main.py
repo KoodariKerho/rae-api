@@ -178,9 +178,12 @@ def get_interested(eventId: str, user: EventUserBaseModel):
         event = EventModel.get(eventId)
     except:
         event = EventModel(eventId, attendees = [], interested = [])
-    for interested in event.interested:
-        if interested['userId'] == user.userId:
-            return HTTPException(status_code=400, detail="User already added")
+    try:
+        for interested in event.interested:
+            if interested['userId'] == user.userId:
+                return HTTPException(status_code=400, detail="User already added")
+    except TypeError: 
+        event.interested = []
     event.interested.append({"userId": user.userId, "photo": user.photo, "username": user.username})
     event.save()
     return HTTPException(status_code=200, detail="User added")

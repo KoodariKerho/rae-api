@@ -33,7 +33,7 @@ class EventUserBaseModel(BaseModel):
     A BaseModel for EventUser
     """
     userId: str
-    photo: str
+    photo: Optional[str] = None
     username: Optional[str] = None
 
 
