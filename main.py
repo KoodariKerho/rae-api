@@ -24,7 +24,8 @@ origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:3006",
-    "https://hlw2l5zrpk.execute-api.eu-north-1.amazonaws.com"
+    "https://hlw2l5zrpk.execute-api.eu-north-1.amazonaws.com",
+    "https://opiskelija-appi.web.app/",
 ]
 
 app.add_middleware(
