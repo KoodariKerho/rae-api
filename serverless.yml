@@ -6,11 +6,12 @@ package:
 provider:
   name: aws
   runtime: python3.8
-  region: eu-west-1
+  region: eu-north-1
   stage: ${opt:stage, "dev"}
 
 plugins:
   - serverless-python-requirements
+  - serverless-offline
 
 custom:
   pythonRequirements:
@@ -43,3 +44,4 @@ functions:
       - http:
           method: any
           path: /{proxy+}
+          cors: true

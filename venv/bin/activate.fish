@@ -29,7 +29,7 @@ end
 # unset irrelevant variables
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/jonijuntto/projects/omat/rae-api/venv"
+set -gx VIRTUAL_ENV "/Users/jonijuntto/projects/omat/rae-api/rae-api-v2/venv"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH
