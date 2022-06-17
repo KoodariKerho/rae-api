@@ -8,6 +8,7 @@ import logging
 from urllib.request import urlopen
 import json
 import boto3
+from fastapi.middleware.cors import CORSMiddleware
 
 
 
@@ -18,6 +19,20 @@ stage = os.environ.get('STAGE', None)
 root_path = f"/{stage}" if stage else "/"
 
 app = FastAPI(title="Rae-api-v2", root_path=root_path) # Here is the magic​
+
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "https://hlw2l5zrpk.execute-api.eu-north-1.amazonaws.com"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/users/{id}", tags=["users"])
@@ -52,19 +67,17 @@ def create_user(id: str, user: UserBaseModel):
 
 @app.put("/update-user/{id}", tags=["users"])
 def update_user(id: str, userModified: UserBaseModel):
-    users = UserModel.scan()
-    for user in users:
-        if not user.id == id:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    
     user = UserModel.get(id)
+    if not user:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     user.username = userModified.username
     user.photo = userModified.photo
     user.email = userModified.email
     user.friends = userModified.friends
     user.posts = userModified.posts
     user.save()
-    return {"message": "User with id ${id} updated"}
+    return HTTPException(status_code=200, detail="User updated")
+
 
 @app.put("/add-friend/{id}/{friendId}", tags=["friends"])
 def add_friend(id: str, friendId: str):
