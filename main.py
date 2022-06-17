@@ -23,6 +23,7 @@ app = FastAPI(title="Rae-api-v2", root_path=root_path) # Here is the magic​
 origins = [
     "http://localhost",
     "http://localhost:8080",
+    "http://localhost:3006",
     "https://hlw2l5zrpk.execute-api.eu-north-1.amazonaws.com"
 ]
 
