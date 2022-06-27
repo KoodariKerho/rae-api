@@ -4,11 +4,13 @@ from models.users import UserBaseModel
 from models.events import EventModel
 from models.events import EventBaseModel
 from models.users import EventUserBaseModel
+from models.events import EventCityBaseModel
 import logging
 from urllib.request import urlopen
 import json
 import boto3
 from fastapi.middleware.cors import CORSMiddleware
+
 
 
 
@@ -25,7 +27,7 @@ origins = [
     "http://localhost:8080",
     "http://localhost:3006",
     "https://hlw2l5zrpk.execute-api.eu-north-1.amazonaws.com",
-    "https://opiskelija-appi.web.app/",
+    "https://opiskelija-appi.web.app",
 ]
 
 app.add_middleware(
@@ -172,9 +174,9 @@ def get_friends_events(userId: str):
     except:
         return []
 
-@app.get("/events", tags=["events"])
-def get_all_events():
-    url = 'https://api.kide.app/api/products?city=Helsinki'
+@app.get("/events/{city}", tags=["events"])
+def get_all_events(city: str = None):
+    url = 'https://api.kide.app/api/products?city=%s' % city
     response = urlopen(url)
     data_json = json.loads(response.read())
     items = (data_json)
