@@ -174,13 +174,18 @@ def get_friends_events(userId: str):
     except:
         return []
 
-@app.get("/events/{city}", tags=["events"])
+@app.get("/events/", tags=["events"])
 def get_all_events(city: str = None):
-    url = 'https://api.kide.app/api/products?city=%s' % city
+    if city:
+        url = 'https://api.kide.app/api/products?city=%s' % city
+    else:
+        url = 'https://api.kide.app/api/products?city=helsinki'
     response = urlopen(url)
     data_json = json.loads(response.read())
     items = (data_json)
     return items.get('model')
+
+
 
 @app.get("/event_attendees_and_interested/{eventId}", tags=["events"])
 def get_event_attendees(eventId: str):
