@@ -174,6 +174,22 @@ def get_friends_events(userId: str):
     except:
         return []
 
+@app.get("/user-events/{userId}", tags=["events"])
+def get_user_events(userId: str):
+    user = UserModel.get(userId)
+    posts = user.posts
+    all_events = get_all_events()
+    events = []
+
+    try:
+        for event in all_events:
+            for post in posts:
+                if event["id"] in post:
+                    events.append(event)
+        return events
+    except:
+        return []
+
 @app.get("/events/", tags=["events"])
 def get_all_events(city: str = None):
     if city:
