@@ -24,3 +24,6 @@ class EventBaseModel(BaseModel):
 
 class EventListModel(BaseModel):
     model: list
+
+class EventCityBaseModel(BaseModel):
+    city: Optional[list] = None
